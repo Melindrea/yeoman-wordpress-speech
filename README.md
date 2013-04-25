@@ -27,3 +27,9 @@ Built on Yeoman 1.0beta, Grunt 0.4.1, Bower 0.8.6. and [Composer](http://getcomp
 ## Bower components #
 - [WordPress](http://wordpress.org/)
 
+## Customisation #
+The `wp-config.php` that the WordPress installation uses is the `wp-config.php` in the root, so set up the databases and update that file.
+
+Whatever theme is used should go in `app/theme`, reference the JavaScript from the same place as the build puts them (IE, fix either the path in the Gruntfile, or in the WordPress files), and have no `readme`, stylesheets or JavaScript. Anything from either of those you want to keep should go in `README.md`, `app/scripts` or `app/styles`.
+
+The theme as it is now has not done any of the modifications to change it away from `_s`, but the styles and javascript have been moved, and the PHP references `scripts` rather than `js`, but `index.html` references none of the JavaScripts.

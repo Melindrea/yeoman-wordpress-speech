@@ -10,9 +10,13 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width">
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-        <link rel="stylesheet" href="styles/main.css">
-        <!-- build:js scripts/vendor/modernizr.js -->
-        <script src="components/modernizr/modernizr.js"></script>
+        <link rel="stylesheet" href="style.css">
+        <!-- build:js scripts/jquery.min.js -->
+        <script src="components/jquery/jquery.js"></script>
+        <!-- endbuild -->
+
+        <!-- build:js scripts/head.min.js -->
+        <script src="components/modernizr/modernizr.min.js"></script>
         <!-- endbuild -->
     </head>
     <body>
@@ -22,7 +26,6 @@
                 <p>You now have</p>
                 <ul>
                     <li>HTML5 Boilerplate</li>
-                    <li>Twitter Bootstrap</li>
                 </ul>
                 <p>installed.</p>
                 <h3>Enjoy coding! - Yeoman</h3>
@@ -41,13 +44,8 @@
             s.parentNode.insertBefore(g,s)}(document,'script'));
         </script>
 
-        <!-- build:js scripts/main.js -->
-        <script src="components/jquery/jquery.js"></script>
+        <!-- build:js scripts/main.min.js -->
         <script src="scripts/main.js"></script>
-        <!-- endbuild -->
-
-        <!-- build:js(.tmp) scripts/coffee.js -->
-        <script src="scripts/hello.js"></script>
         <!-- endbuild -->
 </body>
 </html>
