@@ -12,9 +12,6 @@ var mountFolder = function (connect, dir) {
 // 'test/spec/**/*.js'
 
 module.exports = function (grunt) {
-    // load all grunt tasks
-    require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
-
     // configurable paths
     var yeomanConfig = {
         app: 'app',
@@ -105,8 +102,15 @@ module.exports = function (grunt) {
             customTests: [],
 
             // Files added here will be excluded when looking for Modernizr refs.
-            excludeFiles: ['.tmp/**/*', 'dist/**/*', 'node_modules/**/*', 'test/**/*',
-            'app/components/**/*', 'wordpress/**/*']
+            excludeFiles: [
+                '.tmp/**/*',
+                'dist/**/*',
+                'node_modules/**/*',
+                'test/**/*',
+                'app/components/**/*',
+                'app/vendor/**/*',
+                'wordpress/**/*'
+            ]
         },
         connect: {
             options: {
@@ -198,18 +202,18 @@ module.exports = function (grunt) {
                 options: {
                     debugInfo: true
                 }
+            }
+        },
+        csscss: {
+            options: {
+                verbose: true,
+                outputJson: true,
+                compass: true,
+                failWhenDuplicates: true
             },
-            csscss: {
-                options: {
-                    verbose: true,
-                    outputJson: true,
-                    compass: true,
-                    failWhenDuplicates: true
-                },
-                dist: {
-                    src: ['.tmp/style.css']
-                }
-            },
+            dist: {
+                src: ['.tmp/style.css']
+            }
         },
         // not used since Uglify task does concat,
         // but still available if needed
@@ -373,6 +377,9 @@ module.exports = function (grunt) {
             files: ['package.json', 'component.json', 'composer.json']
         }
     });
+
+    // load all grunt tasks. Put here because grunt-modernizr needs it after the config
+    require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
     grunt.renameTask('regarde', 'watch');
 

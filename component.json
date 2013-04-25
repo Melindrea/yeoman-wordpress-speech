@@ -1,9 +1,12 @@
 {
   "name": "yeoman-wordpress-speech",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "dependencies": {
     "modernizr": "~2.6.2",
     "jquery": "~1.9.1",
     "wordpress": "~3.5.1"
+  },
+  "devDependencies": {
+    "_s": "git://github.com/Automattic/_s.git"
   }
 }
