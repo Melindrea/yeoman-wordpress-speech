@@ -18,33 +18,95 @@ module.exports = function (grunt) {
     // configurable paths
     var yeomanConfig = {
         app: 'app',
-        dist: 'dist'
+        dist: 'wordpress/wp-content/themes/theme-name',
+        wordpress: 'wordpress'
     };
 
     grunt.initConfig({
         yeoman: yeomanConfig,
         watch: {
-            coffee: {
-                files: ['<%= yeoman.app %>/scripts/{,*/}*.coffee'],
-                tasks: ['coffee:dist']
-            },
-            coffeeTest: {
-                files: ['test/spec/{,*/}*.coffee'],
-                tasks: ['coffee:test']
+            js: {
+                files: ['<%= yeoman.app %>/scripts/{,*/}*.js'],
+                tasks: ['js']
             },
             compass: {
                 files: ['<%= yeoman.app %>/styles/{,*/}*.{scss,sass}'],
-                tasks: ['compass:server']
+                tasks: ['compass:server', 'modernizr']
+            },
+            php: {
+                files: ['<%= yeoman.app %>/theme/**/*.php'],
+                tasks: ['phplint']
+            },
+            theme: {
+                files: ['<%= yeoman.app %>/theme/**'],
+                tasks: ['copy:theme']
             },
             livereload: {
                 files: [
                     '<%= yeoman.app %>/*.html',
+                    '<%= yeoman.app %>/theme/**',
                     '{.tmp,<%= yeoman.app %>}/styles/{,*/}*.css',
                     '{.tmp,<%= yeoman.app %>}/scripts/{,*/}*.js',
                     '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
                 ],
                 tasks: ['livereload']
             }
+        },
+        phplint: {
+            theme: ['<%= yeoman.app %>/theme/**/*.php']
+        },
+        //Add the modernizr task with the following configuration
+        modernizr: {
+            // [REQUIRED] Path to the build you're using for development.
+            devFile: 'app/components/modernizr/modernizr.js',
+
+            // [REQUIRED] Path to save out the built file.
+            outputFile: 'app/components/modernizr/modernizr.min.js',
+
+            // Based on default settings on http://modernizr.com/download/
+            extra: {
+                shiv: true,
+                printshiv: false,
+                load: true,
+                mq: false,
+                cssclasses: true
+            },
+
+            // Based on default settings on http://modernizr.com/download/
+            extensibility: {
+                addtest: false,
+                prefixed: false,
+                teststyles: false,
+                testprops: false,
+                testallprops: false,
+                hasevents: false,
+                prefixes: false,
+                domprefixes: false
+            },
+
+            // By default, source is uglified before saving
+            uglify: true,
+
+            // Define any tests you want to impliticly include.
+            tests: [],
+
+            // By default, this task will crawl your project for references to Modernizr tests.
+            // Set to false to disable.
+            parseFiles: true,
+
+            // When parseFiles = true, this task will crawl all *.js, *.css, *.scss files.
+            // You can override this by defining a "files" array below.
+            // "files" : [],
+            // When parseFiles = true, matchCommunityTests = true will attempt to
+            // match user-contributed tests.
+            matchCommunityTests: false,
+
+            // Have custom Modernizr tests? Add paths to their location here.
+            customTests: [],
+
+            // Files added here will be excluded when looking for Modernizr refs.
+            excludeFiles: ['.tmp/**/*', 'dist/**/*', 'node_modules/**/*', 'test/**/*',
+            'app/components/**/*', 'wordpress/**/*']
         },
         connect: {
             options: {
@@ -95,6 +157,7 @@ module.exports = function (grunt) {
                     src: [
                         '.tmp',
                         '<%= yeoman.dist %>/*',
+                        '<%= yeoman.wordpress %>/*',
                         '!<%= yeoman.dist %>/.git*'
                     ]
                 }]
@@ -120,30 +183,10 @@ module.exports = function (grunt) {
                 }
             }
         },
-        coffee: {
-            dist: {
-                files: [{
-                    expand: true,
-                    cwd: '<%= yeoman.app %>/scripts',
-                    src: '{,*/}*.coffee',
-                    dest: '.tmp/scripts',
-                    ext: '.js'
-                }]
-            },
-            test: {
-                files: [{
-                    expand: true,
-                    cwd: 'test/spec',
-                    src: '{,*/}*.coffee',
-                    dest: '.tmp/spec',
-                    ext: '.js'
-                }]
-            }
-        },
         compass: {
             options: {
                 sassDir: '<%= yeoman.app %>/styles',
-                cssDir: '.tmp/styles',
+                cssDir: '.tmp',
                 imagesDir: '<%= yeoman.app %>/images',
                 javascriptsDir: '<%= yeoman.app %>/scripts',
                 fontsDir: '<%= yeoman.app %>/styles/fonts',
@@ -155,7 +198,18 @@ module.exports = function (grunt) {
                 options: {
                     debugInfo: true
                 }
-            }
+            },
+            csscss: {
+                options: {
+                    verbose: true,
+                    outputJson: true,
+                    compass: true,
+                    failWhenDuplicates: true
+                },
+                dist: {
+                    src: ['.tmp/style.css']
+                }
+            },
         },
         // not used since Uglify task does concat,
         // but still available if needed
@@ -216,10 +270,18 @@ module.exports = function (grunt) {
         cssmin: {
             dist: {
                 files: {
-                    '<%= yeoman.dist %>/styles/main.css': [
-                        '.tmp/styles/{,*/}*.css',
+                    '<%= yeoman.dist %>/style.css': [
+                        '.tmp/{,*/}*.css',
                         '<%= yeoman.app %>/styles/{,*/}*.css'
                     ]
+                },
+                options: {
+                    // New line for each part of the banner, like license, tags, etc
+                    banner: '/* \n' +
+                    'Theme Name:         Custom Theme \n' +
+                    'Theme URI:          URI \n' +
+                    'Description:        Description \n' +
+                    '*/'
                 }
             }
         },
@@ -258,29 +320,66 @@ module.exports = function (grunt) {
                         'images/{,*/}*.{webp,gif}',
                         'styles/fonts/*'
                     ]
+                },
+                {
+                    cwd: '<%= yeoman.app %>/components/wordpress',
+                    expand: true,
+                    src: ['**'],
+                    dest: '<%= yeoman.wordpress %>'
+                },
+                {
+                    dest: '<%= yeoman.wordpress %>/wp-config.php',
+                    src: ['wp-config.php']
+                },
+                {
+                    dest: '<%= yeoman.dist %>/README.md',
+                    src: ['README.md']
                 }]
+            },
+            theme: {
+                files: [{
+                    expand: true,
+                    cwd: '<%= yeoman.app %>/theme',
+                    dest: '<%= yeoman.dist %>',
+                    src: ['**']
+                }]
+            }
+        },
+        phpunit: {
+            classes: {
+                dir: 'test/php/spec/'
+            },
+            options: {
+                bin: '<%= yeoman.app %>/vendor/bin/phpunit',
+                bootstrap: 'test/php/phpunit.php',
+                colors: true
             }
         },
         concurrent: {
             server: [
-                'coffee:dist',
                 'compass:server'
             ],
             test: [
-                'coffee',
                 'compass'
             ],
             dist: [
-                'coffee',
                 'compass:dist',
                 'imagemin',
                 'svgmin',
                 'htmlmin'
             ]
+        },
+        bumpup: {
+            files: ['package.json', 'component.json', 'composer.json']
         }
     });
 
     grunt.renameTask('regarde', 'watch');
+
+    grunt.registerTask('js', [
+        'jshint',
+        'modernizr'
+    ]);
 
     grunt.registerTask('server', function (target) {
         if (target === 'dist') {
@@ -301,23 +400,37 @@ module.exports = function (grunt) {
         'clean:server',
         'concurrent:test',
         'connect:test',
-        'mocha'
+        'mocha',
+        'copy:theme',
+        'phpunit'
     ]);
 
-    grunt.registerTask('build', [
-        'clean:dist',
-        'useminPrepare',
-        'concurrent:dist',
-        'cssmin',
-        'concat',
-        'uglify',
-        'copy',
-        'rev',
-        'usemin'
+    grunt.registerTask('build', function (target) {
+        target = target ? target : 'patch';
+        grunt.task.run([
+            'clean:dist',
+            'useminPrepare',
+            'js',
+            'phplint',
+            'concurrent:dist',
+            'cssmin',
+            'concat',
+            'uglify',
+            'copy',
+            'phpunit',
+            'rev',
+            'usemin',
+            'bumpup:' + target
+        ]);
+    });
+
+    grunt.registerTask('lint', [
+        'jshint',
+        'phplint'
     ]);
 
     grunt.registerTask('default', [
-        'jshint',
+        'lint',
         'test',
         'build'
     ]);
